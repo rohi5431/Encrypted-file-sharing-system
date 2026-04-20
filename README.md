@@ -142,28 +142,28 @@ This keeps the project secure even when the AI service is down and allows offlin
 ## 🏗️ Structural Architecture Breakdown
 
 ### 1. Client Layer (Frontend)
-# **Core:** React.js (Vite), Tailwind CSS  
-# **Networking:** Axios for REST, Socket.io-client for real-time events  
-# **Pages:** User Dashboard, Secure Upload Panel, Admin Dashboard with live alerts
+*Core:* React.js (Vite), Tailwind CSS  
+**Networking:** Axios for REST, Socket.io-client for real-time events  
+**Pages:** User Dashboard, Secure Upload Panel, Admin Dashboard with live alerts
 
 ### 2. Authentication Layer (Identity)
-# **Stateless Auth:** JSON Web Tokens (JWT)  
-# **SSO Integration:** Google OAuth 2.0 via Passport.js  
-# **Security:** Bcrypt password hashing
+**Stateless Auth:** JSON Web Tokens (JWT)  
+**SSO Integration:** Google OAuth 2.0 via Passport.js  
+**Security:** Bcrypt password hashing
 
 ### 3. API & Core Logic Layer (Backend Server)
-# **Core:** Node.js, Express.js  
-# **File Management:** Multer for file interception  
-# **Secure Sharing:** OTP-based expiring links
+**Core:** Node.js, Express.js  
+**File Management:** Multer for file interception  
+**Secure Sharing:** OTP-based expiring links
 
 ### 4. Security & AI Layer (The Brain)
-# **AI DLP Scanner:** Intercepts uploads, reads file content, sends it to Gemini, or uses regex fallback  
-# **Encryption Engine:** Encrypts safe files via AES-256 streaming  
-# **Anomaly Engine:** Logs events, evaluates behavior, triggers alerts
+**AI DLP Scanner:** Intercepts uploads, reads file content, sends it to Gemini, or uses regex fallback  
+**Encryption Engine:** Encrypts safe files via AES-256 streaming  
+**Anomaly Engine:** Logs events, evaluates behavior, triggers alerts
 
 ### 5. Data & Storage Layer
-# **Database:** MongoDB / Mongoose stores users, metadata, logs, alerts, and tokens  
-# **Blob Storage:** AWS S3 or local disk stores encrypted `.enc` files
+**Database:** MongoDB / Mongoose stores users, metadata, logs, alerts, and tokens  
+**Blob Storage:** AWS S3 or local disk stores encrypted `.enc` files
 
 ---
 
