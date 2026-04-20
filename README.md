@@ -1,50 +1,109 @@
-# 🚀 Project Overview
+# 🚀 Secure File Sharing System with AI Security Layer
 
-The Secure File Sharing System allows users to upload, encrypt, store, and share files safely.  
-It ensures confidentiality, integrity, and controlled access using encryption, authentication, OTP verification, and role-based authorization.
+The **Secure File Sharing System** allows users to upload, encrypt, store, and share files safely. It protects confidentiality, integrity, and controlled access using encryption, authentication, OTP verification, role-based authorization, and an AI-powered security layer.
 
-This project demonstrates real-world security practices used in modern web applications.
+This project demonstrates real-world security practices used in modern web applications, including file encryption, secure sharing, live admin alerts, anomaly detection, and AI-based Data Loss Prevention (DLP). The original project overview emphasized secure upload, encryption, sharing, JWT authentication, Google OAuth, OTP verification, admin access, rate limiting, and centralized security controls. :contentReference[oaicite:1]{index=1}
 
 ---
 
-# ✨ Key Features
+## ✨ Key Features
 
-## 🔑 Authentication & Authorization
+### 🔑 Authentication & Authorization
 - JWT-based authentication
 - Secure login and registration
 - Google OAuth 2.0 login
 - Role-based access control (User / Admin)
-- Protected routes (frontend and backend)
+- Protected routes on frontend and backend
 
-## 🔐 File Security
+### 🔐 File Security
 - AES-based file encryption before storage
 - Encrypted files stored locally or on AWS S3
 - Secure decryption only for authorized users
 - Unique encrypted file identifiers
 
-## 📤 File Management
+### 📤 File Management
 - Upload encrypted files
 - Download and decrypt files securely
 - View uploaded files
 - Share files with controlled access
 
-## 📧 OTP & Secure Sharing
+### 📧 OTP & Secure Sharing
 - OTP-based secure file sharing
 - Email verification for file access
 - Time-bound access tokens
 
-## 🛡️ System Protection
+### 🛡️ System Protection
 - Rate limiting to prevent API abuse
 - Helmet security headers
 - CORS protection
 - Input validation
 - Centralized error handling middleware
 
-## 👨‍💼 Admin Panel
+### 👨‍💼 Admin Panel
 - View registered users
 - View uploaded files
 - Admin-only protected routes
 - Scheduled admin reports using cron jobs
+
+### 🤖 AI Security Layer
+- AI-powered Data Loss Prevention (DLP) scanner
+- Sensitive data detection before file encryption
+- Live anomaly alerts for suspicious activity
+- Real-time admin notifications using Socket.io
+- Regex fallback when AI service is unavailable
+- Heuristic engine for unusual user behavior
+
+---
+
+## 🧠 AI Security Layer Overview
+
+This project adds a dedicated **AI Security Layer** to make file sharing safer and smarter.
+
+### 1. AI-Powered Data Loss Prevention (DLP)
+Before encrypting a file, the system scans the text/document using an AI model such as **Google Gemini** or **OpenAI**.
+
+**Use case:**  
+If a user accidentally uploads a file containing sensitive information like:
+- Credit card numbers
+- Passwords
+- Aadhaar numbers
+- SSNs
+- Secret tokens or private keys
+
+the AI detects it and shows a warning message before the file is shared or stored.
+
+### 2. Live Alerts with Socket.io
+When the system detects suspicious activity, it sends a real-time alert to the admin dashboard.
+
+**Examples of suspicious activity:**
+- Too many downloads in a short time
+- Unusual login patterns
+- File access at odd hours
+- Multiple failed verification attempts
+
+### 3. Custom Heuristic Engine
+A custom heuristic engine runs inside the Node.js backend and uses MongoDB event logs to detect abnormal behavior.
+
+**Examples:**
+- Download spikes
+- Access from unusual locations
+- Off-hours activity
+- Repeated access attempts
+
+### 4. Regex Fallback Scanner
+If the Gemini API is unavailable, the system automatically falls back to regex-based scanning.
+
+This keeps the project secure even when the AI service is down and allows offline detection of:
+- Aadhaar formats
+- SSNs
+- Credit card patterns
+- Password-like strings
+
+---
+## 🧱 Tech Stack
+<p>
+  <img src="https://skillicons.dev/icons?i=react,vite,tailwind,js,nodejs,express,mongodb,aws,docker,git,redis" />
+</p>
 
 ## 🧱 Tech Stack
 
@@ -52,6 +111,7 @@ This project demonstrates real-world security practices used in modern web appli
 - React.js
 - React Router
 - Axios
+- Socket.io-client
 - Tailwind CSS
 
 ### 🖥️ Backend
@@ -70,57 +130,88 @@ This project demonstrates real-world security practices used in modern web appli
 - Helmet for HTTP security headers
 - Cron jobs for scheduled tasks
 
-## 🧱 Tech Stack
+### 🤖 AI & Real-Time Security
+- Google Gemini AI SDK (`@google/generative-ai`)
+- Socket.io for live alerts
+- Custom anomaly engine
+- Regex-based fallback scanner
+- MongoDB aggregation / event-stream based heuristics
 
-<p>
-  <img src="https://skillicons.dev/icons?i=react,tailwind,js,nodejs,express,mongodb,aws,docker,git" />
-</p>
->
+---
 
-## ✅ Features Summary
-- Secure encrypted file upload & download
-- JWT & Google OAuth authentication
-- OTP-based secure file sharing
-- Role-based access control (User/Admin)
-- AES file encryption before storage
-- Admin monitoring & audit logs
+## 🏗️ Structural Architecture Breakdown
 
-## 🔐 Security Highlights
-- AES encryption for file protection
-- bcrypt password hashing
-- JWT-based stateless authentication
-- OTP verification for sensitive actions
-- Rate limiting & HTTP security headers
-- Encrypted storage (Local / AWS S3)
+### 1. Client Layer (Frontend)
+**Core:** React.js (Vite), Tailwind CSS  
+**Networking:** Axios for REST, Socket.io-client for real-time events  
+**Pages:** User Dashboard, Secure Upload Panel, Admin Dashboard with live alerts
 
-## 🔄 Authentication Flow
+### 2. Authentication Layer (Identity)
+**Stateless Auth:** JSON Web Tokens (JWT)  
+**SSO Integration:** Google OAuth 2.0 via Passport.js  
+**Security:** Bcrypt password hashing
+
+### 3. API & Core Logic Layer (Backend Server)
+**Core:** Node.js, Express.js  
+**File Management:** Multer for file interception  
+**Secure Sharing:** OTP-based expiring links
+
+### 4. Security & AI Layer (The Brain)
+**AI DLP Scanner:** Intercepts uploads, reads file content, sends it to Gemini, or uses regex fallback  
+**Encryption Engine:** Encrypts safe files via AES-256 streaming  
+**Anomaly Engine:** Logs events, evaluates behavior, triggers alerts
+
+### 5. Data & Storage Layer
+**Database:** MongoDB / Mongoose stores users, metadata, logs, alerts, and tokens  
+**Blob Storage:** AWS S3 or local disk stores encrypted `.enc` files
+
+---
+
+## 🔄 Security Flow
+
+### Authentication Flow
 1. User registers or logs in
-2. JWT token issued after successful authentication
-3. Token stored securely on client
+2. JWT token is issued after successful authentication
+3. Token is stored securely on the client
 4. Protected routes validate JWT on every request
 5. Admin routes require role verification
 
-## 🔐 File Encryption Flow
+### File Encryption Flow
 1. File uploaded by authenticated user
-2. File encrypted using AES before storage
-3. Encrypted file stored locally or on AWS S3
-4. Metadata stored in MongoDB
-5. File decrypted only for authorized access
+2. AI DLP scanner checks the content
+3. If sensitive data is detected, user gets a warning
+4. Safe file is encrypted using AES before storage
+5. Encrypted file is stored locally or on AWS S3
+6. Metadata is stored in MongoDB
+7. File is decrypted only for authorized access
+
+### Anomaly Detection Flow
+1. User action is logged to MongoDB event stream
+2. Heuristic engine evaluates the pattern
+3. Suspicious behavior is flagged
+4. Admin receives a real-time Socket.io alert
+
+---
 
 ## 📡 API Overview
-- POST /api/auth/login
-- POST /api/auth/register
-- POST /api/files/upload
-- GET /api/files/:id
-- POST /api/files/share
-- POST /api/otp/verify
-- GET /api/admin/users
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/files/upload`
+- `GET /api/files/:id`
+- `POST /api/files/share`
+- `POST /api/otp/verify`
+- `GET /api/admin/users`
+
+---
 
 ## 🧪 Error Handling
 - Centralized error handling middleware
 - Proper HTTP status codes
-- Validation & authentication errors handled securely
+- Validation and authentication errors handled securely
 - No sensitive data exposed in responses
+
+---
 
 ## 📸 Screenshots
 
@@ -142,173 +233,171 @@ This project demonstrates real-world security practices used in modern web appli
   <img src="screenshots/files.png" width="260" />
 </p>
 
-## 🏗️ System Architecture — Encrypted File Share
+---
 
-```
+## 🏛️ System Architecture — Encrypted File Share + AI Security
+
+```text
 # ===========================
 # CLIENT LAYER (Frontend)
 # ===========================
 ┌─────────────────────────┐
-│        Client (UI)       │
-│  React + Tailwind CSS    │
-│  Browser / Mobile        │
+│     Frontend Client     │
+│  React + Tailwind CSS   │
+│  Axios + Socket.io      │
 └─────────────┬───────────┘
-              │ HTTPS + JWT
+              │ HTTPS / REST / WebSocket
               ▼
 
 # ===========================
-# API SERVER LAYER (Backend)
+# BACKEND API GATEWAY
 # ===========================
-┌─────────────────────────┐
-│   API Gateway / Server  │
-│   Node.js + Express.js  │
-│                         │
-│ ┌─────────────────────┐ │
-│ │ Authentication Layer│
-│ │ JWT / Google OAuth  │
-│ └─────────────────────┘ │
-│                         │
-│ ┌─────────────────────┐ │
-│ │ Authorization Layer │
-│ │ RBAC (User/Admin)   │
-│ └─────────────────────┘ │
-│                         │
-│ ┌─────────────────────┐ │
-│ │ Encryption Engine   │
-│ │ AES (File Encrypt) │
-│ └─────────────────────┘ │
-│                         │
-│ ┌─────────────────────┐ │
-│ │ File Services       │
-│ │ Upload / Download  │
-│ │ Share / OTP        │
-│ └─────────────────────┘ │
-│                         │
-│ ┌─────────────────────┐ │
-│ │ Security Middleware │
-│ │ Helmet / RateLimit  │
-│ └─────────────────────┘ │
-└─────────────┬───────────┘
+┌──────────────────────────────────────────┐
+│          Node.js + Express.js           │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ Authentication Layer               │  │
+│  │ JWT / Google OAuth                 │  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ File Management                   │  │
+│  │ Upload / Download / Share / OTP   │  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ AI DLP Scanner                    │  │
+│  │ Gemini / Regex Fallback           │  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ Anomaly Engine                    │  │
+│  │ Heuristics / Event Stream         │  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ Encryption Engine                 │  │
+│  │ AES-256 Streaming                 │  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ Security Middleware               │  │
+│  │ Helmet / Rate Limit / Validation  │  │
+│  └────────────────────────────────────┘  │
+└─────────────┬───────────┬───────────────┘
+              │           │
+              │           └──────────────► Socket.io Live Alerts
               │
               ▼
 
 # ===========================
-# STORAGE LAYER
+# DATA & STORAGE LAYER
 # ===========================
-┌─────────────────────────┐
-│        Storage Layer    │
-│ ┌─────────────────────┐│
-│ │ MongoDB (Metadata)  ││
-│ └─────────────────────┘│
-│ ┌─────────────────────┐│
-│ │ Local Storage / S3  ││
-│ │ Encrypted Files     ││
-│ └─────────────────────┘│
-└─────────────────────────┘
+┌──────────────────────────────────────────┐
+│               Data Layer                 │
+│  MongoDB Atlas                           │
+│  - User Profiles                         │
+│  - File Metadata                         │
+│  - Audit Logs                            │
+│  - Anomaly Alerts                        │
+│  - Event Stream                          │
+│                                          │
+│  AWS S3 / Local Disk                     │
+│  - Encrypted .enc Files                  │
+└──────────────────────────────────────────┘
 ```
-
 ## 📁 Project Structure
 
 ### 🖥️ Backend
 
 ```
 backend/
-├── config/                         # Configuration files
-│   ├── db.js                       # MongoDB connection
-│   └── passport.js                 # Google OAuth configuration
-│
-├── controllers/                    # Request handlers
-│   ├── auth.controller.js          # Authentication logic
-│   ├── file.controller.js          # File upload & management
-│   ├── share.controller.js         # Secure file sharing
-│   ├── otp.controller.js           # OTP generation & validation
-│   ├── admin.controller.js         # Admin operations
-│   └── downloadFileById.controller.js # Secure file download by ID
-│
-├── middleware/                     # Custom middleware
-│   ├── auth.middleware.js          # JWT authentication
-│   ├── admin.middleware.js         # Admin-only access
-│   ├── rateLimit.middleware.js     # API rate limiting
-│   ├── error.middleware.js         # Centralized error handling
-│   └── upload.middleware.js        # File upload handling (Multer)
-│
-├── models/                         # Database schemas
-│   ├── User.js                     # User model
-│   ├── file.js                     # File metadata model
-│   ├── OTP.js                      # OTP storage
-│   ├── shareLink.js                # Shared file links
-│   ├── AuditLog.js                 # System audit logs
-│   └── AdminNotification.js        # Admin alerts & notifications
-│
-├── routes/                         # API routes
-│   ├── auth.routes.js              # Authentication routes
-│   ├── file.routes.js              # File routes
-│   ├── share.routes.js             # File sharing routes
-│   ├── otp.routes.js               # OTP routes
-│   └── admin.routes.js             # Admin routes
-│
-├── utils/                          # Utility helpers
-│   ├── crypto_utils.js             # Cryptographic utilities
-│   ├── encryption.js               # AES encryption/decryption
-│   ├── generateToken.js            # JWT generation
-│   ├── sendEmail.js                # Email service (Nodemailer)
-│   ├── s3upload.js                 # AWS S3 upload helper
-│   ├── storage.js                  # Storage abstraction
-│   └── tokenGenerator.js           # Secure token generation
-│
-├── cron/                           # Scheduled tasks
-│   └── adminReports.cron.js        # Automated admin reports
-│
-├── uploads_encrypted/              # Encrypted file storage
-│
-├── server.js                       # Server entry point
-└── package.json                    # Backend dependencies
+├── config/
+│   ├── db.js
+│   └── passport.js
+├── controllers/
+│   ├── auth.controller.js
+│   ├── file.controller.js
+│   ├── share.controller.js
+│   ├── otp.controller.js
+│   ├── admin.controller.js
+│   └── downloadFileById.controller.js
+├── middleware/
+│   ├── auth.middleware.js
+│   ├── admin.middleware.js
+│   ├── rateLimit.middleware.js
+│   ├── error.middleware.js
+│   └── upload.middleware.js
+├── models/
+│   ├── User.js
+│   ├── file.js
+│   ├── OTP.js
+│   ├── shareLink.js
+│   ├── AuditLog.js
+│   ├── AdminNotification.js
+│   └── EventStream.js
+├── routes/
+│   ├── auth.routes.js
+│   ├── file.routes.js
+│   ├── share.routes.js
+│   ├── otp.routes.js
+│   └── admin.routes.js
+├── utils/
+│   ├── crypto_utils.js
+│   ├── encryption.js
+│   ├── generateToken.js
+│   ├── sendEmail.js
+│   ├── s3upload.js
+│   ├── storage.js
+│   ├── tokenGenerator.js
+│   ├── dlpScanner.js
+│   ├── anomalyEngine.js
+│   └── regexFallback.js
+├── cron/
+│   └── adminReports.cron.js
+├── uploads_encrypted/
+├── server.js
+└── package.json
 ```
 
 ### 🌐 Frontend
 
 ```
 frontend/
-├── public/                         # Static assets
-│
+├── public/
 ├── src/
-│   ├── api/                        # API configuration & services
-│   │   ├── axios.js                # Axios instance & interceptors
-│   │   └── admin.api.js            # Admin-related API calls
-│   │
-│   ├── auth/                       # Authentication helpers
-│   │   └── ProtectedRoute.jsx      # Route protection component
-│   │
-│   ├── components/                 # Reusable UI components
-│   │   ├── Navbar.jsx              # Navigation bar
-│   │   ├── FileCard.jsx            # File display card
-│   │   ├── UploadBox.jsx           # File upload UI
-│   │   ├── OTPInput.jsx            # OTP input component
-│   │   └── Loader.jsx              # Loading indicator
-│   │
-│   ├── context/                    # Global state management
-│   │   └── AuthContext.jsx         # Authentication context
-│   │
-│   ├── hooks/                      # Custom React hooks
-│   │   └── useIdleLogout.js        # Auto logout on inactivity
-│   │
-│   ├── pages/                      # Application pages
-│   │   ├── Dashboard.jsx           # User dashboard
-│   │   ├── Upload.jsx              # File upload page
-│   │   ├── MyFiles.jsx             # User files list
-│   │   ├── ShareFile.jsx           # File sharing page
-│   │   ├── Download.jsx            # Secure file download
-│   │   ├── VerifyOTP.jsx           # OTP verification page
-│   │   └── admin/                  # Admin pages
-│   │       ├── AdminDashboard.jsx  # Admin dashboard
-│   │       ├── AdminUsers.jsx      # Manage users
-│   │       └── AdminFiles.jsx      # Manage files
-│   │
-│   ├── App.jsx                     # Root component
-│   └── main.jsx                    # Application entry point
-│
-├── vite.config.js                  # Vite configuration
-└── package.json                    # Frontend dependencies
+│   ├── api/
+│   │   ├── axios.js
+│   │   └── admin.api.js
+│   ├── auth/
+│   │   └── ProtectedRoute.jsx
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── FileCard.jsx
+│   │   ├── UploadBox.jsx
+│   │   ├── OTPInput.jsx
+│   │   ├── Loader.jsx
+│   │   └── LiveAlerts.jsx
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   ├── hooks/
+│   │   └── useIdleLogout.js
+│   ├── pages/
+│   │   ├── Dashboard.jsx
+│   │   ├── Upload.jsx
+│   │   ├── MyFiles.jsx
+│   │   ├── ShareFile.jsx
+│   │   ├── Download.jsx
+│   │   ├── VerifyOTP.jsx
+│   │   └── admin/
+│   │       ├── AdminDashboard.jsx
+│   │       ├── AdminUsers.jsx
+│   │       ├── AdminFiles.jsx
+│   │       └── AdminAlerts.jsx
+│   ├── App.jsx
+│   └── main.jsx
+├── vite.config.js
+└── package.json
 ```
 ## ⚙️ Environment Variables
 
@@ -327,7 +416,10 @@ SERVER_URL=http://localhost:5000
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-STORAGE=local   # options: local | s3
+GEMINI_API_KEY=your_gemini_api_key
+
+STORAGE=local
+# options: local | s3
 ```
 
 ### 📌 Notes
@@ -377,6 +469,8 @@ Specialized in Backend Development & Security
 
 - GitHub: https://github.com/rohi5431 
 - Email: rohitk60316@gmail.com
+- Linkedln: https://www.linkedin.com/in/rohit-kumar-3707382a2/
+
 
 
 
