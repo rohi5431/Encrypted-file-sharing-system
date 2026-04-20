@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: encrypted-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./uploads_encrypted:/app/uploads_encrypted
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    container_name: encrypted-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
