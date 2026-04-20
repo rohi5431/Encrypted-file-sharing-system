@@ -306,6 +306,9 @@ This keeps the project secure even when the AI service is down and allows offlin
 │  - Encrypted .enc Files                  │
 └──────────────────────────────────────────┘
 ```
+## 🏗️ System Architecture
+
+![System Architecture](./assets/architecture.png)
 ## 📁 Project Structure
 
 ### 🖥️ Backend
