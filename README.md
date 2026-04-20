@@ -139,33 +139,97 @@ This keeps the project secure even when the AI service is down and allows offlin
 
 ---
 
-## 🏗️ Structural Architecture Breakdown
+## 🏗️ System Architecture
 
-### 1. Client Layer (Frontend)
-*Core:* React.js (Vite), Tailwind CSS  
-**Networking:** Axios for REST, Socket.io-client for real-time events  
-**Pages:** User Dashboard, Secure Upload Panel, Admin Dashboard with live alerts
-
-### 2. Authentication Layer (Identity)
-**Stateless Auth:** JSON Web Tokens (JWT)  
-**SSO Integration:** Google OAuth 2.0 via Passport.js  
-**Security:** Bcrypt password hashing
-
-### 3. API & Core Logic Layer (Backend Server)
-**Core:** Node.js, Express.js  
-**File Management:** Multer for file interception  
-**Secure Sharing:** OTP-based expiring links
-
-### 4. Security & AI Layer (The Brain)
-**AI DLP Scanner:** Intercepts uploads, reads file content, sends it to Gemini, or uses regex fallback  
-**Encryption Engine:** Encrypts safe files via AES-256 streaming  
-**Anomaly Engine:** Logs events, evaluates behavior, triggers alerts
-
-### 5. Data & Storage Layer
-**Database:** MongoDB / Mongoose stores users, metadata, logs, alerts, and tokens  
-**Blob Storage:** AWS S3 or local disk stores encrypted `.enc` files
+The application follows a **layered architecture** designed for security, scalability, and real-time monitoring.
 
 ---
+
+### 🌐 1. Client Layer (Frontend)
+
+Handles user interaction and real-time communication with the backend.
+
+**Core Technologies**
+- React.js (Vite)
+- Tailwind CSS
+
+**Networking**
+- Axios for REST API requests
+- Socket.io-client for real-time alerts and notifications
+
+**Key Interfaces**
+- User Dashboard
+- Secure File Upload Panel
+- Admin Dashboard with Live Alerts
+
+---
+
+### 🔐 2. Authentication Layer (Identity)
+
+Responsible for **user authentication and authorization**.
+
+**Authentication**
+- JSON Web Tokens (JWT) for stateless authentication
+
+**SSO Integration**
+- Google OAuth 2.0 via Passport.js
+
+**Security**
+- Bcrypt for secure password hashing
+
+---
+
+### ⚙️ 3. API & Core Logic Layer (Backend Server)
+
+Processes business logic and manages secure file operations.
+
+**Core Technologies**
+- Node.js
+- Express.js
+
+**File Management**
+- Multer middleware for secure file upload interception
+
+**Secure Sharing**
+- OTP-based expiring links for controlled file access
+
+---
+
+### 🧠 4. Security & AI Layer (Intelligent Protection)
+
+Provides **advanced security checks and anomaly detection** before files are stored.
+
+**AI DLP Scanner**
+- Scans uploaded files
+- Detects sensitive information using **Google Gemini AI**
+- Uses **Regex fallback scanning** when AI service is unavailable
+
+**Encryption Engine**
+- Encrypts validated files using **AES-256 streaming encryption**
+
+**Anomaly Detection Engine**
+- Logs user activities
+- Detects suspicious behavior patterns
+- Triggers real-time alerts via **Socket.io**
+
+---
+
+### 🗄️ 5. Data & Storage Layer
+
+Handles persistent data storage and encrypted file storage.
+
+**Database**
+- MongoDB (via Mongoose)
+- Stores:
+  - User profiles
+  - File metadata
+  - Audit logs
+  - Anomaly alerts
+  - Authentication tokens
+
+**Blob Storage**
+- AWS S3 or Local Storage
+- Stores encrypted `.enc` files
 
 ## 🔄 Security Flow
 
