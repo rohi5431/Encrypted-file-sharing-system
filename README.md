@@ -308,9 +308,9 @@ This keeps the project secure even when the AI service is down and allows offlin
 ```
 ## 🏗️ System Architecture
 
-![System Architecture](./assets/architecture.png)
-## 📁 Project Structure
-
+<p align="center">
+  <img src="assets/architecture.png" width="800"/>
+</p>
 ### 🖥️ Backend
 
 ```
