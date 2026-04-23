@@ -369,15 +369,14 @@ Handles persistent data storage and encrypted file storage.
 │  AWS S3 / Local Disk                     │
 │  - Encrypted .enc Files                  │
 └──────────────────────────────────────────┘
-```
 
----
 ## 🏗️ System Architecture
 
 <p align="center">
   <img src="screenshots/Architecture.png" width="800"/>
 </p>
----
+
+```
 ### 🖥️ Backend
 
 ```
