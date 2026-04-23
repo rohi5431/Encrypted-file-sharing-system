@@ -373,7 +373,7 @@ Handles persistent data storage and encrypted file storage.
 ## 🏗️ System Architecture
 
 <p align="center">
-  <img src="assets/Architecture.png" width="800"/>
+  <img src="screenshots/Architecture.png" width="800"/>
 </p>
 ### 🖥️ Backend
 
