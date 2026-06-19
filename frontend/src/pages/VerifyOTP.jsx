@@ -1,40 +1,63 @@
-import { useParams, useLocation } from "react-router-dom";
 import { useState } from "react";
-import api from "../api/axios";
-import OTPInput from "../components/OTPInput";
-import CountdownTimer from "../components/CountdownTimer";
+import { useParams, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Lock, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 
-/* =========================
-   BACKEND URL
-========================= */
-const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { Button, Card, CardContent, CardHeader, CardTitle, CardDescription, Alert } from "@/components/ui";
+import api from "@/api/axios";
 
-/* =========================
-   FORCE FILE DOWNLOAD
-========================= */
 const forceDownload = (path) => {
   if (!path) return;
-
   const link = document.createElement("a");
-  link.href = `${BACKEND_URL}${path}`;
+  link.href = `${import.meta.env.VITE_API_BASE_URL || ""}${path}`;
   link.setAttribute("download", "");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
 
-export default function VerifyOTP() {
+function VerifyOTPPage() {
   const { token } = useParams();
   const query = new URLSearchParams(useLocation().search);
   const email = query.get("email");
 
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const newOtp = pastedData.split("").concat(Array(6 - pastedData.length).fill(""));
+    setOtp(newOtp);
+  };
+
   const verifyOtp = async () => {
-    if (otp.length !== 6) {
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) {
       setError("Please enter a valid 6-digit OTP");
       return;
     }
@@ -43,83 +66,100 @@ export default function VerifyOTP() {
     setLoading(true);
 
     try {
-      const res = await api.post("/file/verify-otp", {
-        token,
-        email,
-        otp,
-      });
-
+      const res = await api.post("/file/verify-otp", { token, email, otp: otpCode });
       const downloadUrl = res.data?.downloadUrl;
 
       if (!downloadUrl) {
-        throw new Error("Download URL missing from server");
+        throw new Error("Download URL missing");
       }
 
-      // ✅ CORRECT SHARED DOWNLOAD ROUTE
+      toast.success("OTP verified!");
       forceDownload(downloadUrl);
     } catch (err) {
-      console.error("Verify OTP Error:", err.response?.data || err.message);
-      setError(
-        err.response?.data?.message || "Invalid or expired OTP"
-      );
+      const message = err.response?.data?.message || "Invalid or expired OTP";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-
-        {/* ICON */}
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl">
-          🔐
-        </div>
-
-        {/* HEADER */}
-        <h2 className="text-center text-2xl font-semibold text-slate-800">
-          Verify One-Time Password
-        </h2>
-
-        <p className="mt-2 text-center text-sm text-slate-500">
-          Enter the 6-digit OTP sent to
-          <br />
-          <span className="font-medium text-slate-700">
-            {email}
-          </span>
-        </p>
-
-        {/* OTP INPUT */}
-        <div className="mt-6 flex justify-center">
-          <OTPInput value={otp} onChange={setOtp} />
-        </div>
-
-        {/* TIMER */}
-        <div className="mt-4 flex justify-center text-sm text-slate-500">
-          <CountdownTimer seconds={300} />
-        </div>
-
-        {/* ERROR */}
-        {error && (
-          <div className="mt-4 rounded-lg bg-red-100 px-4 py-3 text-center text-sm text-red-700">
-            {error}
+    <div className="min-h-screen flex items-center justify-center bg-background p-8">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md"
+      >
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+              <Lock className="h-6 w-6 text-accent-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground">
+              SecureShare
+            </span>
           </div>
-        )}
+        </div>
 
-        {/* VERIFY BUTTON */}
-        <button
-          onClick={verifyOtp}
-          disabled={loading}
-          className="mt-6 w-full rounded-xl bg-green-600 py-3 text-base font-medium text-white hover:bg-green-700 disabled:opacity-50"
-        >
-          {loading ? "Verifying OTP..." : "Verify & Download"}
-        </button>
+        <Card className="border-0 shadow-xl">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+              <Lock className="h-8 w-8 text-success" />
+            </div>
+            <CardTitle className="text-2xl">Verify OTP</CardTitle>
+            <CardDescription>
+              Enter the 6-digit code sent to
+              <br />
+              <span className="font-medium text-foreground">{email}</span>
+            </CardDescription>
+          </CardHeader>
 
-        {/* FOOTER */}
-        <p className="mt-4 text-center text-xs text-slate-400">
-          This OTP is valid for a limited time for security reasons.
-        </p>
-      </div>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" description={error} className="mb-6" />
+            )}
+
+            {/* OTP Input */}
+            <div className="flex justify-center gap-2 mb-6" onPaste={handlePaste}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="h-14 w-12 rounded-lg border border-input bg-background text-center text-xl font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                />
+              ))}
+            </div>
+
+            <Button
+              className="w-full h-12"
+              loading={loading}
+              onClick={verifyOtp}
+            >
+              Verify & Download
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground mt-6">
+              This OTP is valid for a limited time for security reasons.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
+  );
+}
+
+export default function VerifyOTPPageWrapper() {
+  return (
+    <ThemeProvider>
+      <VerifyOTPPage />
+    </ThemeProvider>
   );
 }

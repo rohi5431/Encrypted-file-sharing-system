@@ -38,7 +38,6 @@ export default function App() {
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* ================= GOOGLE OAUTH ================= */}
-      {/* ❗ MUST be PUBLIC (not protected) */}
       <Route path="/oauth-success" element={<AuthSuccess />} />
 
       {/* ================= USER ================= */}
@@ -123,8 +122,11 @@ export default function App() {
       <Route
         path="*"
         element={
-          <div className="flex min-h-screen items-center justify-center text-gray-500">
-            404 | Page Not Found
+          <div className="flex min-h-screen items-center justify-center bg-background">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-foreground">404</h1>
+              <p className="text-muted-foreground mt-2">Page not found</p>
+            </div>
           </div>
         }
       />

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Files Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #ffffff; --fg: #0a0a0a; --muted: #f5f5f5; --muted-fg: #6b7280; --card: #ffffff; --border: #e5e7eb; --primary: #0a0a0a; --primary-fg: #fafafa; --accent: #3b82f6; --success: #22c55e; font-family: 'Inter', sans-serif; }
+  body { background: var(--bg); color: var(--fg); display: flex; min-height: 100vh; }
+  .sidebar { width: 256px; min-height: 100vh; background: var(--card); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; }
+  .logo { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 24px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
+  .logo-text { font-size: 17px; font-weight: 700; }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--muted-fg); padding: 4px 12px; margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--muted-fg); cursor: pointer; margin-bottom: 2px; }
+  .nav-item.active { background: var(--accent); color: white; }
+  .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-email { font-size: 11px; color: var(--muted-fg); }
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .navbar { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: var(--muted); padding: 7px 14px; border-radius: 8px; width: 280px; }
+  .search-wrap input { background: none; border: none; outline: none; font-size: 14px; width: 100%; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--muted); border: none; cursor: pointer; }
+  .navbar-actions { display: flex; align-items: center; gap: 8px; }
+  .content { flex: 1; padding: 28px 32px; overflow-y: auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--muted-fg); margin-bottom: 24px; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .search-bar { display: flex; align-items: center; gap: 8px; background: var(--muted); padding: 8px 14px; border-radius: 8px; width: 280px; }
+  .search-bar input { background: none; border: none; outline: none; font-size: 13px; width: 100%; }
+  .view-btns { display: flex; gap: 4px; }
+  .view-btn { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; background: var(--accent); color: white; }
+  .view-btn.inactive { background: var(--muted); color: var(--muted-fg); }
+  .upload-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--muted-fg); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--muted); }
+  .file-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .file-row { display: flex; align-items: center; gap: 10px; }
+  .file-name { font-weight: 500; color: var(--fg); }
+  .muted { color: var(--muted-fg); }
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-pdf { background: rgba(239,68,68,0.1); color: #dc2626; }
+  .badge-zip { background: rgba(245,158,11,0.1); color: #b45309; }
+  .badge-img { background: rgba(236,72,153,0.1); color: #be185d; }
+  .badge-txt { background: rgba(59,130,246,0.1); color: var(--accent); }
+  .badge-csv { background: rgba(34,197,94,0.1); color: #15803d; }
+  .action-btn { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; margin-right: 4px; }
+  .action-dl { background: rgba(59,130,246,0.1); color: var(--accent); }
+  .action-sh { background: rgba(34,197,94,0.1); color: #15803d; }
+  .action-del { background: rgba(239,68,68,0.1); color: #dc2626; }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo"><div class="logo-icon">🛡</div><span class="logo-text">SecureShare</span></div>
+  <div class="nav-label">Main</div>
+  <div class="nav-item">⬛ Dashboard</div>
+  <div class="nav-item active">📁 My Files</div>
+  <div class="nav-item">⬆ Upload</div>
+  <div class="nav-item">🔗 Shared Links</div>
+  <div style="margin-top:8px;" class="nav-label">Account</div>
+  <div class="nav-item">⚙ Settings</div>
+  <div class="sidebar-footer">
+    <div class="user-item">
+      <div class="avatar">JD</div>
+      <div><div class="user-name">John Doe</div><div class="user-email">john@example.com</div></div>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <nav class="navbar">
+    <div class="search-wrap"><span>🔍</span><input placeholder="Search..." /></div>
+    <div class="navbar-actions">
+      <button class="icon-btn">🌙</button>
+      <button class="icon-btn">🔔</button>
+      <div class="avatar" style="width:36px;height:36px;">JD</div>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="header-row">
+      <div>
+        <h1>My Files</h1>
+        <p class="subtitle">47 files · 2.4 GB used</p>
+      </div>
+      <button class="upload-btn">⬆ Upload File</button>
+    </div>
+    <div class="toolbar">
+      <div class="search-bar"><span>🔍</span><input placeholder="Search files..." /></div>
+      <div class="view-btns">
+        <button class="view-btn">≡</button>
+        <button class="view-btn inactive">⊞</button>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>File</th><th>Type</th><th>Size</th><th>Uploaded</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(239,68,68,0.1)">📄</div><span class="file-name">Q2-financial-report.pdf</span></div></td>
+            <td><span class="badge badge-pdf">pdf</span></td>
+            <td class="muted">3.2 MB</td>
+            <td class="muted">Jun 15, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(245,158,11,0.1)">🗜</div><span class="file-name">design-assets-v3.zip</span></div></td>
+            <td><span class="badge badge-zip">zip</span></td>
+            <td class="muted">18.7 MB</td>
+            <td class="muted">Jun 12, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(236,72,153,0.1)">🖼</div><span class="file-name">product-screenshots.png</span></div></td>
+            <td><span class="badge badge-img">png</span></td>
+            <td class="muted">4.1 MB</td>
+            <td class="muted">Jun 10, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(34,197,94,0.1)">📊</div><span class="file-name">user-data-export.csv</span></div></td>
+            <td><span class="badge badge-csv">csv</span></td>
+            <td class="muted">840 KB</td>
+            <td class="muted">Jun 8, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(59,130,246,0.1)">📝</div><span class="file-name">meeting-notes-june.txt</span></div></td>
+            <td><span class="badge badge-txt">txt</span></td>
+            <td class="muted">24 KB</td>
+            <td class="muted">Jun 5, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+          <tr>
+            <td><div class="file-row"><div class="file-icon" style="background:rgba(239,68,68,0.1)">📄</div><span class="file-name">contract-draft-v2.pdf</span></div></td>
+            <td><span class="badge badge-pdf">pdf</span></td>
+            <td class="muted">1.1 MB</td>
+            <td class="muted">Jun 2, 2026</td>
+            <td style="text-align:right;"><button class="action-btn action-dl">⬇</button><button class="action-btn action-sh">Share</button><button class="action-btn action-del">🗑</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

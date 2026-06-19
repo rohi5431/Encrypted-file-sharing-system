@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0a0a0a; --fg: #fafafa; --muted: #161618; --muted-fg: #a1a1aa; --card: #0a0a0a; --border: #27272a; --primary: #fafafa; --primary-fg: #0a0a0a; --accent: #3b82f6; --success: #16a34a; --destructive: #dc2626; --warning: #d97706; font-family: 'Inter', sans-serif; }
+  body { background: var(--bg); color: var(--fg); display: flex; min-height: 100vh; }
+  .sidebar { width: 256px; min-height: 100vh; background: var(--bg); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; }
+  .logo { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 24px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
+  .logo-text { font-size: 17px; font-weight: 700; color: var(--fg); }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--muted-fg); padding: 4px 12px; margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--muted-fg); cursor: pointer; margin-bottom: 2px; }
+  .nav-item.active { background: var(--accent); color: white; }
+  .nav-item:not(.active):hover { background: var(--muted); color: var(--fg); }
+  .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+  .user-name { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .user-email { font-size: 11px; color: var(--muted-fg); }
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .navbar { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: var(--bg); }
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: var(--muted); padding: 7px 14px; border-radius: 8px; width: 280px; }
+  .search-wrap input { background: none; border: none; outline: none; font-size: 14px; color: var(--fg); width: 100%; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--muted); border: none; cursor: pointer; color: var(--fg); }
+  .navbar-actions { display: flex; align-items: center; gap: 8px; }
+  .badge-admin { background: rgba(59,130,246,0.2); color: var(--accent); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+  .content { flex: 1; padding: 28px 32px; overflow-y: auto; }
+  h1 { font-size: 22px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--muted-fg); margin-bottom: 24px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--muted); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .stat-label { font-size: 13px; font-weight: 500; color: var(--muted-fg); }
+  .stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .stat-change { font-size: 12px; color: var(--muted-fg); }
+  .stat-pos { color: #4ade80; }
+  .two-col { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+  .card { background: var(--muted); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .card-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--fg); }
+  .card-desc { font-size: 12px; color: var(--muted-fg); margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; color: var(--muted-fg); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 13px 16px; font-size: 13px; color: var(--fg); border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-success { background: rgba(22,163,74,0.2); color: #4ade80; }
+  .badge-danger { background: rgba(220,38,38,0.2); color: #f87171; }
+  .badge-warn { background: rgba(217,119,6,0.2); color: #fbbf24; }
+  .badge-info { background: rgba(59,130,246,0.2); color: var(--accent); }
+  .badge-secondary { background: rgba(255,255,255,0.08); color: var(--muted-fg); }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 6px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .alert-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .alert-msg { font-size: 13px; color: var(--fg); font-weight: 500; }
+  .alert-sub { font-size: 12px; color: var(--muted-fg); margin-top: 2px; }
+  .resolve-btn { margin-left: auto; font-size: 11px; padding: 4px 10px; border-radius: 6px; border: none; cursor: pointer; background: rgba(255,255,255,0.06); color: var(--muted-fg); flex-shrink: 0; }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo"><div class="logo-icon">🛡</div><span class="logo-text">SecureShare</span></div>
+  <div class="nav-label">Admin</div>
+  <div class="nav-item active">⬛ Overview</div>
+  <div class="nav-item">👥 Users</div>
+  <div class="nav-item">📁 All Files</div>
+  <div class="nav-item">🤖 AI Layer</div>
+  <div style="margin-top:8px;" class="nav-label">Navigation</div>
+  <div class="nav-item">⬅ Back to App</div>
+  <div class="sidebar-footer">
+    <div class="user-item">
+      <div class="avatar">AD</div>
+      <div><div class="user-name">Admin User</div><div class="user-email">admin@secureshare.io</div></div>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <nav class="navbar">
+    <div class="search-wrap"><span style="color:var(--muted-fg)">🔍</span><input placeholder="Search..." style="color:var(--fg);"/></div>
+    <div class="navbar-actions">
+      <span class="badge-admin">Admin</span>
+      <button class="icon-btn">🌙</button>
+      <button class="icon-btn">🔔</button>
+      <div class="avatar" style="width:36px;height:36px;">AD</div>
+    </div>
+  </nav>
+  <div class="content">
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">System overview and security monitoring</p>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header"><span class="stat-label">Total Users</span><div class="stat-icon" style="background:rgba(59,130,246,0.15)">👥</div></div>
+        <div class="stat-value">1,247</div>
+        <div class="stat-change stat-pos">↑ 84 this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span class="stat-label">Files Stored</span><div class="stat-icon" style="background:rgba(34,197,94,0.15)">📁</div></div>
+        <div class="stat-value">28.4K</div>
+        <div class="stat-change stat-pos">↑ 2,310 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span class="stat-label">DLP Alerts</span><div class="stat-icon" style="background:rgba(245,158,11,0.15)">⚠</div></div>
+        <div class="stat-value">14</div>
+        <div class="stat-change" style="color:var(--muted-fg)">3 unresolved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span class="stat-label">Storage Used</span><div class="stat-icon" style="background:rgba(239,68,68,0.15)">💾</div></div>
+        <div class="stat-value">1.8 TB</div>
+        <div class="stat-change" style="color:var(--muted-fg)">62% capacity</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Recent uploads -->
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Recent Uploads</div><div class="card-desc">Last 24 hours</div></div>
+          <span class="badge badge-success"><span class="live-dot"></span>Live</span>
+        </div>
+        <table>
+          <thead><tr><th>User</th><th>File</th><th>Size</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--muted-fg)">alice@corp.com</td>
+              <td>contract-nda.pdf</td>
+              <td style="color:var(--muted-fg)">2.1 MB</td>
+              <td><span class="badge badge-warn">DLP Flag</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted-fg)">bob@acme.com</td>
+              <td>design-mockup.fig</td>
+              <td style="color:var(--muted-fg)">8.4 MB</td>
+              <td><span class="badge badge-success">Clean</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted-fg)">carol@tech.io</td>
+              <td>payroll-data.xlsx</td>
+              <td style="color:var(--muted-fg)">1.2 MB</td>
+              <td><span class="badge badge-danger">Blocked</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted-fg)">dave@startup.co</td>
+              <td>pitch-deck-final.pptx</td>
+              <td style="color:var(--muted-fg)">15.7 MB</td>
+              <td><span class="badge badge-success">Clean</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted-fg)">eve@fintech.dev</td>
+              <td>bank-statements.pdf</td>
+              <td style="color:var(--muted-fg)">890 KB</td>
+              <td><span class="badge badge-warn">DLP Flag</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Security Alerts -->
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Security Alerts</div><div class="card-desc">Real-time events</div></div>
+        </div>
+        <div>
+          <div class="alert-row">
+            <div class="alert-icon" style="background:rgba(220,38,38,0.15)">🚨</div>
+            <div style="flex:1;">
+              <div class="alert-msg">SSN detected in upload</div>
+              <div class="alert-sub">payroll-data.xlsx · carol@tech.io · 2m ago</div>
+            </div>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          <div class="alert-row">
+            <div class="alert-icon" style="background:rgba(217,119,6,0.15)">⚠</div>
+            <div style="flex:1;">
+              <div class="alert-msg">Credit card numbers found</div>
+              <div class="alert-sub">contract-nda.pdf · alice@corp.com · 8m ago</div>
+            </div>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          <div class="alert-row">
+            <div class="alert-icon" style="background:rgba(217,119,6,0.15)">⚠</div>
+            <div style="flex:1;">
+              <div class="alert-msg">Bank account data detected</div>
+              <div class="alert-sub">bank-statements.pdf · eve@fintech.dev · 14m ago</div>
+            </div>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          <div class="alert-row">
+            <div class="alert-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+            <div style="flex:1;">
+              <div class="alert-msg">Resolved: API keys detected</div>
+              <div class="alert-sub">config.env · prev upload · 1h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

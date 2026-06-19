@@ -1,8 +1,14 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import api from "../api/axios";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Mail, Lock, ArrowLeft, Shield } from "lucide-react";
+import toast from "react-hot-toast";
 
-export default function Download() {
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, CardDescription, Alert } from "@/components/ui";
+import api from "@/api/axios";
+
+function DownloadPage() {
   const { token } = useParams();
   const navigate = useNavigate();
 
@@ -11,92 +17,135 @@ export default function Download() {
   const [error, setError] = useState("");
 
   const sendOtp = async () => {
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+
     setError("");
     setLoading(true);
+
     try {
       await api.post("/file/send-otp", { token, email });
+      toast.success("OTP sent to your email!");
       navigate(`/verify-otp/${token}?email=${encodeURIComponent(email)}`);
     } catch (err) {
-      console.error("OTP error:", err.response?.data || err.message);
-      setError(
-        err.response?.data?.message ||
-          "Failed to send OTP. Link may be expired."
-      );
+      const message = err.response?.data?.message || "Failed to send OTP. Link may be expired.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6">
-      <div className="flex w-full max-w-5xl min-h-[620px] overflow-hidden rounded-2xl bg-white shadow-lg">
-
-        {/* ================= LEFT IMAGE ================= */}
-        <div className="hidden w-1/2 items-center justify-center bg-gradient-to-br from-violet-50 to-indigo-100 md:flex">
-          <img
-            src="/secure-share.png"
-            alt="Secure File Download"
-            className="w-4/5 max-w-md scale-105"
-          />
-        </div>
-
-        {/* ================= RIGHT CONTENT ================= */}
-        <div className="w-full md:w-1/2 px-10 py-14 flex flex-col justify-center">
-
-          {/* BACK BUTTON */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-6 w-fit text-sm font-medium text-indigo-600 hover:underline"
+    <div className="min-h-screen flex bg-background">
+      {/* Left Panel - Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-cyan-600/80 z-10" />
+        <img
+          src="https://images.unsplash.com/photo-1639329278788-e9a4e6d1b1e1?w=1200&q=80"
+          alt="Secure Download"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 flex flex-col justify-end p-12 text-white z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            ← Back
-          </button>
-
-          {/* HEADER */}
-          <h2 className="text-3xl font-semibold text-slate-800">
-            Secure File Download
-          </h2>
-          <p className="mt-2 text-base text-slate-500">
-            Verify your email to receive a one-time password (OTP)
-          </p>
-
-          {/* INFO */}
-          <div className="mt-6 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-            🔒 For security reasons, an OTP will be sent to your email before
-            downloading the file.
-          </div>
-
-          {/* ERROR */}
-          {error && (
-            <div className="mt-5 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">
-              {error}
+            <div className="flex items-center gap-3 mb-4">
+              <Shield className="h-10 w-10" />
+              <span className="text-2xl font-bold">SecureShare</span>
             </div>
-          )}
-
-          {/* EMAIL INPUT */}
-          <div className="mt-6">
-            <label className="block text-sm font-medium text-slate-600 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full rounded-lg border px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            />
-          </div>
-
-          {/* SEND OTP BUTTON */}
-          <button
-            onClick={sendOtp}
-            disabled={loading || !email}
-            className="mt-6 w-full rounded-xl bg-slate-800 py-4 text-lg font-medium text-white hover:bg-slate-900 disabled:opacity-50"
-          >
-            {loading ? "Sending OTP..." : "Send OTP"}
-          </button>
-
+            <h2 className="text-3xl font-bold mb-4">
+              Secure File Download
+            </h2>
+            <p className="text-lg opacity-90">
+              Files are encrypted and require OTP verification for access.
+            </p>
+          </motion.div>
         </div>
       </div>
+
+      {/* Right Panel - Form */}
+      <div className="flex flex-1 items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md"
+        >
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+
+          <div className="flex items-center justify-center mb-6 lg:hidden">
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                <Lock className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <span className="text-xl font-bold text-foreground">
+                SecureShare
+              </span>
+            </div>
+          </div>
+
+          <Card className="border-0 shadow-xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+                <Lock className="h-8 w-8 text-accent" />
+              </div>
+              <CardTitle className="text-2xl">Secure Download</CardTitle>
+              <CardDescription>
+                Enter your email to receive a one-time password
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <div className="mb-6 p-4 rounded-lg bg-muted text-sm text-muted-foreground">
+                <p>
+                  For security reasons, an OTP will be sent to your email before
+                  downloading the file.
+                </p>
+              </div>
+
+              {error && (
+                <Alert variant="destructive" description={error} className="mb-4" />
+              )}
+
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="you@example.com"
+                icon={<Mail className="h-4 w-4" />}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <Button
+                className="w-full h-12 mt-6"
+                loading={loading}
+                onClick={sendOtp}
+              >
+                Send OTP
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
+  );
+}
+
+export default function DownloadPageWrapper() {
+  return (
+    <ThemeProvider>
+      <DownloadPage />
+    </ThemeProvider>
   );
 }

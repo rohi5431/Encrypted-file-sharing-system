@@ -1,11 +1,57 @@
 import { useEffect, useState } from "react";
-import api from "../../api/axios";
-import AdminLayout from "./AdminLayout";
-import { Folder, Download } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Folder,
+  Download,
+  Search,
+  Trash2,
+  HardDrive,
+  FileText,
+  Image,
+  FileCode,
+  FileArchive,
+} from "lucide-react";
+import toast from "react-hot-toast";
+
+import { DashboardLayout } from "@/components/layout";
+import {
+  Card,
+  CardContent,
+  Button,
+  Badge,
+  EmptyState,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  AlertDialog,
+} from "@/components/ui";
+import api from "@/api/axios";
+import { formatBytes, formatDate, cn } from "@/lib/utils";
+
+const getFileIcon = (type) => {
+  if (type?.startsWith("image/")) return Image;
+  if (type?.startsWith("text/")) return FileText;
+  if (type?.includes("javascript") || type?.includes("json")) return FileCode;
+  if (type?.includes("zip") || type?.includes("rar")) return FileArchive;
+  return FileText;
+};
+
+const getFileTypeColor = (type) => {
+  if (type?.startsWith("image/")) return "bg-pink-500/10 text-pink-500";
+  if (type?.startsWith("text/")) return "bg-blue-500/10 text-blue-500";
+  if (type?.includes("pdf")) return "bg-red-500/10 text-red-500";
+  if (type?.includes("zip") || type?.includes("rar")) return "bg-yellow-500/10 text-yellow-500";
+  return "bg-gray-500/10 text-gray-500";
+};
 
 export default function AdminFiles() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, file: null });
 
   useEffect(() => {
     fetchFiles();
@@ -19,124 +65,176 @@ export default function AdminFiles() {
       .finally(() => setLoading(false));
   };
 
-  const deleteFile = async (id) => {
-    if (!confirm("Are you sure you want to delete this file?")) return;
+  const handleDelete = async () => {
+    if (!deleteDialog.file) return;
 
     try {
-      await api.delete(`/admin/file/${id}`);
-      setFiles((prev) => prev.filter((f) => f._id !== id));
+      await api.delete(`/admin/file/${deleteDialog.file._id}`);
+      setFiles((prev) => prev.filter((f) => f._id !== deleteDialog.file._id));
+      toast.success("File deleted successfully");
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Failed to delete file");
+      toast.error("Failed to delete file");
+    } finally {
+      setDeleteDialog({ open: false, file: null });
     }
   };
 
-  return (
-    <AdminLayout title="Files">
-      {/* ================= HEADER ================= */}
-      <div className="mb-6 flex items-center justify-between rounded-xl bg-white px-6 py-5 shadow-sm border border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-            <Folder size={20} />
-          </div>
+  const filteredFiles = files.filter(
+    (f) =>
+      f.originalName?.toLowerCase().includes(search.toLowerCase()) ||
+      f.owner?.email?.toLowerCase().includes(search.toLowerCase())
+  );
 
+  const totalStorage = files.reduce((sum, f) => sum + (f.size || 0), 0);
+
+  return (
+    <DashboardLayout isAdmin>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Files Management
-            </h2>
-            <p className="text-sm text-gray-600">
-              View, manage, and delete uploaded files
+            <h1 className="text-2xl font-bold text-foreground">Files</h1>
+            <p className="text-muted-foreground mt-1">
+              {files.length} files · {formatBytes(totalStorage)} total
             </p>
           </div>
+
+          <a href={`${import.meta.env.VITE_API_BASE_URL || ""}/api/admin/export`}>
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </a>
         </div>
 
-        {/* EXPORT CSV */}
-        <a
-          href="http://localhost:5000/api/admin/export-files"
-          className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            placeholder="Search files..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-10 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        {/* Files Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          <Download size={16} />
-          Export CSV
-        </a>
-      </div>
-
-      {/* ================= TABLE ================= */}
-      <div className="rounded-xl bg-white shadow-sm border border-gray-200 overflow-hidden">
-        {loading && (
-          <p className="p-6 text-center text-gray-500">
-            Loading files...
-          </p>
-        )}
-
-        {!loading && (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="p-4 text-left font-medium text-gray-700">
-                  File Name
-                </th>
-                <th className="p-4 text-center font-medium text-gray-700">
-                  Owner
-                </th>
-                <th className="p-4 text-center font-medium text-gray-700">
-                  Size
-                </th>
-                <th className="p-4 text-center font-medium text-gray-700">
-                  Storage
-                </th>
-                <th className="p-4 text-center font-medium text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {files.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="p-6 text-center text-gray-500"
-                  >
-                    No files found
-                  </td>
-                </tr>
+          <Card>
+            <CardContent className="p-0">
+              {loading ? (
+                <div className="space-y-4 p-6">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-14 skeleton rounded-lg" />
+                  ))}
+                </div>
+              ) : filteredFiles.length === 0 ? (
+                <EmptyState
+                  icon={<Folder className="h-8 w-8" />}
+                  title={search ? "No files found" : "No files yet"}
+                  description={
+                    search
+                      ? "Try a different search term"
+                      : "Files will appear here when users upload them"
+                  }
+                  className="py-16"
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>File</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Storage</TableHead>
+                      <TableHead>Uploaded</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredFiles.map((file, index) => {
+                      const Icon = getFileIcon(file.mimeType);
+                      const typeColor = getFileTypeColor(file.mimeType);
+                      return (
+                        <motion.tr
+                          key={file._id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="border-b border-border hover:bg-muted/50 transition-colors"
+                        >
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={cn(
+                                  "flex h-10 w-10 items-center justify-center rounded-lg",
+                                  typeColor
+                                )}
+                              >
+                                <Icon className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground text-sm">
+                                  {file.originalName}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {file.mimeType?.split("/")[1] || "file"}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {file.owner?.email || "Unknown"}
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {formatBytes(file.size)}
+                          </td>
+                          <td className="p-4">
+                            <Badge variant="secondary" className="text-xs">
+                              <HardDrive className="h-3 w-3 mr-1" />
+                              {file.storage}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {formatDate(file.createdAt)}
+                          </td>
+                          <td className="p-4 text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() =>
+                                setDeleteDialog({ open: true, file })
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
-
-              {files.map((file) => (
-                <tr
-                  key={file._id}
-                  className="border-t hover:bg-gray-50"
-                >
-                  <td className="p-4 text-gray-800">
-                    {file.originalName}
-                  </td>
-
-                  <td className="p-4 text-center text-gray-700">
-                    {file.owner?.email || "—"}
-                  </td>
-
-                  <td className="p-4 text-center text-gray-700">
-                    {(file.size / 1024).toFixed(1)} KB
-                  </td>
-
-                  <td className="p-4 text-center capitalize text-gray-700">
-                    {file.storage}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    <button
-                      onClick={() => deleteFile(file._id)}
-                      className="rounded-md bg-red-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
-    </AdminLayout>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, file: null })}
+        onConfirm={handleDelete}
+        title="Delete File"
+        description={`Are you sure you want to delete "${deleteDialog.file?.originalName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+      />
+    </DashboardLayout>
   );
 }
