@@ -281,7 +281,7 @@ Handles persistent data storage and encrypted file storage.
 
 <p align="center">
   <img src="screenshots/login.png" width="260" />
-  <img src="screenshots/register.png" width="260" />
+  <img src="screenshots/auth-register-new.png" width="260" />
   <img src="screenshots/user-dashboard.png" width="260" />
 </p>
 
