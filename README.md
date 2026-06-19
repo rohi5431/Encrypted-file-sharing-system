@@ -286,7 +286,7 @@ Handles persistent data storage and encrypted file storage.
 </p>
 
 <p align="center">
-  <img src="screenshots/file-upload.png" width="260" />
+  <img src="screenshots/preview-upload.png" width="260" />
   <img src="screenshots/file-download.png" width="260" />
   <img src="screenshots/otp-verify.png" width="260" />
 </p>
