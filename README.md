@@ -282,7 +282,7 @@ Handles persistent data storage and encrypted file storage.
 <p align="center">
   <img src="screenshots/auth-login-wide.png" width="260" />
   <img src="screenshots/auth-register-new.png" width="260" />
-  <img src="screenshots/user-dashboard.png" width="260" />
+  <img src="screenshots/preview-dashboard.png" width="260" />
 </p>
 
 <p align="center">
